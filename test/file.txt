@@ -1,0 +1,2 @@
+Welcome from inside the file
+Writing to the file: Welcome from inside the file
