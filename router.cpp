@@ -1,11 +1,11 @@
 #include "utils.h"
 
-#include <iostream>
 #include "Init.h"
 #include "dgram.h"
 #include "sys_wrappers.h"
 
 
+#include <iostream>
 #include <utility>
 #include <chrono>
 #include <sstream>
@@ -90,7 +90,7 @@ public:
         std::cout << format_table();
         for(auto& network : interfaces) {
             for(const auto& node : routing) {
-                if(!node.send_dist(turn, socket_fd, network.broadcast_ip)) {
+                if(!node.send_dist(socket_fd, network.broadcast_ip)) {
                     network.mark_unreachable(turn);
                 }
                 else {
