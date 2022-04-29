@@ -29,7 +29,7 @@ network_node::network_node(uint32_t network_ip, uint8_t mask, uint32_t dist)
 }
 
 bool network_node::send_dist(int socket_fd, uint32_t ip) const {
-    if(connected_directly)
+    if(network_ip == interface::get_network(route_addr, mask))
         return dgram{ip, mask, (uint32_t)-1}.send(socket_fd) == 9;
     return dgram{ip, mask, dist}.send(socket_fd) == 9;
 }

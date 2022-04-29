@@ -22,7 +22,7 @@ class router {
 
     uint32_t turn;
 
-    const seconds timeout = 5s;
+    const seconds timeout = 30s;
 
 public:
     router(interface_table&& interfaces, int socket_fd)

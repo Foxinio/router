@@ -32,6 +32,6 @@ long dgram::send(int socket_fd) {
             .sin_addr = { .s_addr = (in_addr_t)this->ip },
             .sin_zero = {}
     };
-    dgram to_send(htonl(ip), mask, htonl(dist));
+    dgram to_send(htonl(interface::get_network(ip, mask)), mask, htonl(dist));
     return Sendto(socket_fd, &to_send, sizeof(dgram), 0, (const sockaddr*)&receiver, sizeof(sockaddr_in));
 }
