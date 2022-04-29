@@ -37,8 +37,13 @@ std::string get_addr_with_mask(uint32_t addr, uint8_t mask) {
         throw not_valid_address_exception();
     }
     buffer[slash] = '/';
-    buffer[slash+1] = (char)(mask/10)+'0';
-    buffer[slash+2] = (char)(mask%10)+'0';
+    if(mask<10) {
+        buffer[slash + 1] = (char)mask + '0';
+    }
+    else {
+        buffer[slash + 1] = (char) (mask / 10) + '0';
+        buffer[slash + 2] = (char) (mask % 10) + '0';
+    }
     return buffer;
 }
 

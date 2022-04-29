@@ -4,8 +4,8 @@
 
 #include "Init.h"
 
-#include "utils.h"
 #include "sys_wrappers.h"
+#include "utils.h"
 
 #include <arpa/inet.h>
 #include <unistd.h>

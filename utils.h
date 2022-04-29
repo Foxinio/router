@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 #define PORT 54321
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 #define debug(LOG) std::cerr << LOG
 #else

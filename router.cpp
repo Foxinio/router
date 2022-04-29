@@ -87,7 +87,9 @@ public:
         mark_reachable(*route);
         auto other = find_or_insert(read.ip, read.mask, in);
         route->unreachable_since = turn;
-        other->attempt_update(in, route->dist, read.dist, turn);
+        if(route->network_ip != other->network_ip) {
+            other->attempt_update(in, route->dist, read.dist, turn);
+        }
     }
 
     std::string format_table() {
@@ -99,7 +101,7 @@ public:
     }
 
     void distribute_table() {
-        std::cout << format_table();
+        std::cout << format_table() << std::endl;
         for(auto& network : interfaces) {
             debug("network: " << inet::get_addr_with_mask(network.network_ip, network.my_mask)
                 << ", last heard: " << network.unreachable_since << "\n");
@@ -108,13 +110,13 @@ public:
                     << " via " << inet::get_addr(node.route_addr) << " on "
                     << inet::get_addr_with_mask(network.broadcast_ip, network.my_mask)
                     << ". current dist: " << node.dist << "\n");
-                if(node.send_dist(socket_fd, network.broadcast_ip)) {
+                if(node.send_dist(socket_fd, network.broadcast_ip, network.my_mask)) {
                     debug("sending successful\n");
-                    mark_unreachable(network);
+                    mark_reachable(network);
                 }
                 else {
                     debug("sending failed: [" << errno << "] " << std::strerror(errno) << "\n");
-                    mark_reachable(network);
+                    mark_unreachable(network);
                 }
             }
             if(turn > network.unreachable_since + 5) {
