@@ -30,7 +30,7 @@ public:
 class interface {
 public:
     uint32_t dist;
-    uint32_t unreachable_since = (uint32_t)-1;
+    uint32_t unreachable_since = 0;
     uint32_t broadcast_ip;
     uint32_t network_ip;
     uint8_t my_mask;
