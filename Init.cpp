@@ -42,13 +42,13 @@ void Init::handle_init() {
     interfaces = read_input();
     socket_fd = Socket(AF_INET, SOCK_DGRAM, 0);
 
-    sockaddr_in servaddr = {
-            .sin_family = AF_INET,
-            .sin_port = PORT,
-            .sin_addr = { .s_addr = INADDR_ANY } ,
-            .sin_zero = {}
-    };
-    Bind(socket_fd, (const sockaddr *)&servaddr, sizeof(sockaddr_in));
+//    sockaddr_in servaddr = {
+//            .sin_family = AF_INET,
+//            .sin_port = PORT,
+//            .sin_addr = { .s_addr = INADDR_ANY } ,
+//            .sin_zero = {}
+//    };
+//    Bind(socket_fd, (const sockaddr *)&servaddr, sizeof(sockaddr_in));
     int broadcastPermission = 1;
     Setsockopt(socket_fd, SOL_SOCKET, SO_BROADCAST, &broadcastPermission, sizeof(int));
 }

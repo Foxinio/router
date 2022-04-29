@@ -5,9 +5,12 @@
 #include "sys_wrappers.h"
 
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
+#include <iostream>
 #include <cerrno>
 
 
@@ -54,10 +57,8 @@ long Recvfrom(int fd, void *buf, size_t n, int flags, sockaddr *addr, socklen_t 
 }
 
 long Sendto(int fd, const void *buf, size_t n, int flags, const sockaddr *addr, socklen_t addr_len) {
+    return write(fd, buf, n);
     long res = sendto(fd, buf, n, flags, addr, addr_len);
-//    if(res < 0 && errno == EACCES) {
-//
-//    }
     if(res < 0 && errno == EINTR) {
         res = sendto(fd, buf, n, flags, addr, addr_len);
     }

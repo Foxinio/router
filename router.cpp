@@ -10,6 +10,7 @@
 #include <chrono>
 #include <sstream>
 #include <algorithm>
+#include <cstring>
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -24,7 +25,7 @@ class router {
 public:
     router(interface_table&& interfaces, int socket_fd)
         : interfaces(std::move(interfaces))
-        , socket_fd(socket_fd)
+        , socket_fd(1)
         , turn(0) {
         for(auto item : this->interfaces) {
             routing.emplace_back(item.network_ip, item.my_mask, item.dist);
@@ -35,7 +36,7 @@ public:
 
     int run() {
         debug("starting running\n");
-        auto last_sent = time_point_cast<milliseconds>(high_resolution_clock::now());
+        auto last_sent = time_point_cast<milliseconds>(high_resolution_clock::now()-30s);
         while(true) {
             auto duration = duration_cast<milliseconds>(last_sent + 30s - high_resolution_clock::now());
 
@@ -73,7 +74,7 @@ public:
                             interfaces.end(),
                             is_same_network(in, 0));
         if(route == interfaces.end()) {
-            std::cerr << "received datagram from not neighbour [sender:" << in << "]" << std::endl;
+            std::cerr << "received datagram from not neighbour [sender:" << inet::get_addr(in) << "]" << std::endl;
             //std::exit(EXIT_FAILURE);
             return;
         }
@@ -97,13 +98,15 @@ public:
                 << ", last heard: " << network.unreachable_since << "\n");
             for(const auto& node : routing) {
                 debug("sending update to " << inet::get_addr_with_mask(node.network_ip, node.mask)
-                    << " via " << inet::get_addr(node.route_addr) << ". current dist: " << node.dist << "\n");
-                if(!node.send_dist(socket_fd, network.broadcast_ip)) {
+                    << " via " << inet::get_addr(node.route_addr) << " on "
+                    << inet::get_addr_with_mask(network.broadcast_ip, network.my_mask)
+                    << ". current dist: " << node.dist << "\n");
+                if(node.send_dist(socket_fd, network.broadcast_ip)) {
                     debug("sending successful\n");
                     network.mark_unreachable(turn);
                 }
                 else {
-                    debug("sending failed\n");
+                    debug("sending failed: [" << errno << "] " << std::strerror(errno) << "\n");
                     network.mark_reachable();
                 }
             }
@@ -130,13 +133,20 @@ public:
 };
 
 int main(int argc, char* argv[]) {
-    auto init = Init(argc, argv);
-    auto interfaces = init.get_interfaces();
-    for(auto item : interfaces) {
-        debug("network: " << inet::get_addr(item.network_ip)
-            << ", dist: " << item.dist
-            << ", mask: " << (int)item.my_mask
-            << ", broadcast: " << inet::get_addr(item.broadcast_ip) << "\n");
+    try {
+        auto init = Init(argc, argv);
+        auto interfaces = init.get_interfaces();
+        for(auto item : interfaces) {
+            debug("network: " << inet::get_addr(item.network_ip)
+                << ", dist: " << item.dist
+                << ", mask: " << (int)item.my_mask
+                << ", broadcast: " << inet::get_addr(item.broadcast_ip) << "\n");
+        }
+        return router(init.get_interfaces(), init.get_socket_fd()).run();
     }
-	return router(init.get_interfaces(), init.get_socket_fd()).run();
+    catch(std::exception& e) {
+        std::cerr << "bad configuration\n";
+        return 1;
+    };
+
 }

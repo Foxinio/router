@@ -30,8 +30,8 @@ network_node::network_node(uint32_t network_ip, uint8_t mask, uint32_t dist)
 
 bool network_node::send_dist(int socket_fd, uint32_t ip) const {
     if(connected_directly)
-        return dgram{ip, mask, (uint32_t)-1}.send(socket_fd) >= 0;
-    return dgram{ip, mask, dist}.send(socket_fd) >= 0;
+        return dgram{ip, mask, (uint32_t)-1}.send(socket_fd) == 9;
+    return dgram{ip, mask, dist}.send(socket_fd) == 9;
 }
 
 void network_node::attempt_update(uint32_t new_route_addr, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn) {
