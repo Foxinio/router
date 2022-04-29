@@ -22,10 +22,12 @@ class router {
 
     uint32_t turn;
 
+    const seconds timeout = 5s;
+
 public:
     router(interface_table&& interfaces, int socket_fd)
         : interfaces(std::move(interfaces))
-        , socket_fd(1)
+        , socket_fd(socket_fd)
         , turn(0) {
         for(auto item : this->interfaces) {
             routing.emplace_back(item.network_ip, item.my_mask, item.dist);
@@ -36,9 +38,9 @@ public:
 
     int run() {
         debug("starting running\n");
-        auto last_sent = time_point_cast<milliseconds>(high_resolution_clock::now()-30s);
+        auto last_sent = time_point_cast<milliseconds>(high_resolution_clock::now()-timeout);
         while(true) {
-            auto duration = duration_cast<milliseconds>(last_sent + 30s - high_resolution_clock::now());
+            auto duration = duration_cast<milliseconds>(last_sent + timeout - high_resolution_clock::now());
 
             debug("entering Poll with wait time: " << std::max((int)duration.count(), 0) << "ms\n");
             if(Poll(socket_fd, std::max((int)duration.count(), 0)) == 0) {
@@ -55,9 +57,13 @@ public:
         }
     }
 
+    std::vector<network_node>::iterator find(uint32_t ip, uint8_t mask) {
+        return std::find_if(routing.begin(), routing.end(), is_same_network(ip, mask));
+    }
+
     std::vector<network_node>::iterator find_or_insert(uint32_t ip, uint8_t mask, uint32_t route_ip) {
         debug("searching routing_table for " << inet::get_addr_with_mask(ip, mask) << "\n");
-        auto other = std::find_if(routing.begin(), routing.end(), is_same_network(ip, mask));
+        auto other = find(ip, mask);
         if(other == routing.end()) {
             debug("not found - appending new element to table.\n");
             routing.emplace_back(ip, route_ip, mask, -1);
@@ -78,6 +84,7 @@ public:
             //std::exit(EXIT_FAILURE);
             return;
         }
+        mark_reachable(*route);
         auto other = find_or_insert(read.ip, read.mask, in);
         route->unreachable_since = turn;
         other->attempt_update(in, route->dist, read.dist, turn);
@@ -103,20 +110,30 @@ public:
                     << ". current dist: " << node.dist << "\n");
                 if(node.send_dist(socket_fd, network.broadcast_ip)) {
                     debug("sending successful\n");
-                    network.mark_unreachable(turn);
+                    mark_unreachable(network);
                 }
                 else {
                     debug("sending failed: [" << errno << "] " << std::strerror(errno) << "\n");
-                    network.mark_reachable();
+                    mark_reachable(network);
                 }
             }
             if(turn > network.unreachable_since + 5) {
                 debug("no responce for 5 turns on "
                     << inet::get_addr_with_mask(network.network_ip, network.my_mask)
                     << ". Marking as unreachable.\n");
-                network.mark_unreachable(turn);
+                mark_unreachable(network);
             }
         }
+    }
+
+    void mark_reachable(interface &network) {
+        network.mark_reachable();
+        find(network.network_ip, network.my_mask)->dist = network.dist;
+    }
+
+    void mark_unreachable(interface &network) {
+        network.mark_unreachable(turn);
+        find(network.network_ip, network.my_mask)->dist = network_node::inf;
     }
 
     void clear_unreachable() {

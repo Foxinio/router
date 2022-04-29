@@ -2,20 +2,17 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-void magic_fun() {
-    int fd = open("file.txt", O_RDWR);
-    dup2(fd, STDIN_FILENO);
-    dup2(fd, STDOUT_FILENO);
-    close(fd);
-}
+#include "../utils.h"
+#include "../network_node.h"
 
 int main() {
-    std::cout << "Enter your name: ";
-    std::string in;
-    std::getline(std::cin, in);
-    std::cout << "Hello " << in << std::endl;
-//    std::cerr << "[ERR] Opening " << in << std::endl;
-    std::getline(std::cin, in);
-    std::cout << "Writing to the file: " << in << std::endl;
-    std::cerr << "[ERR] Read from file: " << in << std::endl;
+    while(true) {
+        std::string s;
+        std::getline(std::cin, s);
+        auto [ip, mask] = inet::get_addr_with_mask(s);
+//        inet::get_addr()
+        std::cout << "ip:" << inet::get_addr(ip) << ",mask:" << (int)mask << std::endl;
+        std::cout << "network:" << inet::get_addr(interface::get_network(ip, mask))
+                  << ",broadcast:" << inet::get_addr(interface::get_broadcast(ip,mask)) << std::endl;
+    }
 }
