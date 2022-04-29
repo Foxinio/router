@@ -46,6 +46,7 @@ public:
 using routing_table = std::vector<network_node>;
 using interface_table = std::vector<interface>;
 
+std::ostream& operator<<(std::ostream& out, routing_table tab);
 
 class is_same_network {
     uint32_t my_ip;

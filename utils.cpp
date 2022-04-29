@@ -47,7 +47,13 @@ std::pair<uint32_t,uint8_t> get_addr_with_mask(const std::string& addr) {
     if(slash == std::string::npos) {
         throw not_valid_address_exception();
     }
-    uint8_t mask = (addr[slash+1]-'0')*10+(addr[slash+2]-'0');
+    uint8_t mask;
+    if(addr.length() == slash+3) {
+        mask = (addr[slash + 1] - '0') * 10 + addr[slash + 2] - '0';
+    }
+    else {
+        mask = (addr[slash + 1] - '0');
+    }
     uint32_t res = 0;
     char buffer[19] = {0};
     addr.copy(buffer, 19);

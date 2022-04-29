@@ -7,6 +7,9 @@
 #include "utils.h"
 #include "dgram.h"
 
+#include <string>
+#include <iostream>
+
 std::string network_node::format() const {
     return inet::get_addr_with_mask(network_ip, mask)
         + (!is_dist_inf(dist) ? " distance " + std::to_string(dist) : " unreachable")
@@ -32,18 +35,25 @@ bool network_node::send_dist(int socket_fd, uint32_t ip) const {
 }
 
 void network_node::attempt_update(uint32_t new_route_addr, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn) {
+    debug("attempting to update routing table, elem: [" << format() << "] new_addr: " << inet::get_addr(new_route_addr)
+        << ", dist_to_route: " << dist_to_route << ", new_dist: " << new_dist << "\n");
     if(new_route_addr == route_addr) {
+        debug("same route addr.\n");
         if(is_dist_inf(new_dist)) {
+            debug("updating to inf.\n");
             if(!is_dist_inf(this->dist)) {
+                debug("first message of this kind.\n");
                 unreachable_since = turn;
             }
             this->dist = new_dist;
         }
         else {
+            debug("normal update/possible increase in consts.\n");
             this->dist = new_dist + dist_to_route;
         }
     }
     else if(!is_dist_inf(new_dist) && new_dist + dist_to_route < dist) {
+        debug("normal update.\n");
         this->route_addr = new_route_addr;
         this->dist = new_dist + dist_to_route;
     }
@@ -76,6 +86,13 @@ uint32_t interface::get_broadcast(uint32_t ip, uint8_t mask) {
 
 uint32_t interface::get_network(uint32_t ip, uint8_t mask) {
     return ip & ((uint32_t)-1)>>(32-mask);
+}
+
+std::ostream& operator<<(std::ostream& out, routing_table tab) {
+    for(const auto& item : tab) {
+        out << item.format() << "\n";
+    }
+    return out;
 }
 
 is_same_network::is_same_network(uint32_t my_ip, uint8_t my_mask)

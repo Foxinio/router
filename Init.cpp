@@ -17,6 +17,7 @@ Init::Init(int argc_, char* argv_[]) {
 }
 
 interface_table Init::read_input() {
+//    debug(std::cerr << "reading input.\n");
     int no_neighbours = 0;
     std::cin >> no_neighbours;
     interface_table res;
@@ -28,6 +29,7 @@ interface_table Init::read_input() {
         std::cin >> dist;
         auto [addr, mask] = inet::get_addr_with_mask(addr_string);
         res.emplace_back(addr, dist, mask, true);
+//        debug(std::cerr << "read " << addr_string << " with dist: " << dist << "\n");
     }
     return res;
 }
@@ -48,7 +50,7 @@ void Init::handle_init() {
     };
     Bind(socket_fd, (const sockaddr *)&servaddr, sizeof(sockaddr_in));
     int broadcastPermission = 1;
-    setsockopt(socket_fd, SOL_SOCKET, SO_BROADCAST, &broadcastPermission, sizeof(int));
+    Setsockopt(socket_fd, SOL_SOCKET, SO_BROADCAST, &broadcastPermission, sizeof(int));
 }
 
 int Init::get_socket_fd() const {

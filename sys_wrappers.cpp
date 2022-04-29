@@ -63,3 +63,12 @@ long Sendto(int fd, const void *buf, size_t n, int flags, const sockaddr *addr, 
     }
     return res;
 }
+
+int Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen) {
+    int res = setsockopt(fd, level, optname, optval, optlen);
+    if(res < 0) {
+        perror("setsockopt error");
+        std::exit(EXIT_FAILURE);
+    }
+    return res;
+}

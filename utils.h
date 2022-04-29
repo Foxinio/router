@@ -7,7 +7,12 @@
 #include <stdexcept>
 
 #define PORT 54321
-
+#define DEBUG
+#ifdef DEBUG
+#define debug(LOG) std::cerr << LOG
+#else
+#define debug(LOG)
+#endif
 namespace inet {
 
 class not_valid_address_exception : public std::exception {
