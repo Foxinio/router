@@ -18,7 +18,7 @@ public:
     uint32_t dist{};
 
     static std::pair<uint32_t,dgram> recv(int socket_fd);
-    long send(int socket_fd);
+    long send(int socket_fd, uint32_t ip);
 
 } __attribute__((packed));
 

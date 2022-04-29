@@ -25,11 +25,11 @@ std::pair<uint32_t,dgram> dgram::recv(int socket_fd) {
     return {sender.sin_addr.s_addr, res};
 }
 
-long dgram::send(int socket_fd) {
+long dgram::send(int socket_fd, uint32_t ip) {
     sockaddr_in receiver = {
             .sin_family = AF_INET,
             .sin_port = PORT,
-            .sin_addr = { .s_addr = (in_addr_t)this->ip },
+            .sin_addr = { .s_addr = (in_addr_t)ip },
             .sin_zero = {}
     };
     dgram to_send(htonl(interface::get_network(ip, mask)), mask, htonl(dist));

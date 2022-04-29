@@ -28,10 +28,14 @@ network_node::network_node(uint32_t network_ip, uint8_t mask, uint32_t dist)
     connected_directly = true;
 }
 
-bool network_node::send_dist(int socket_fd, uint32_t ip) const {
-    if(network_ip == interface::get_network(route_addr, mask))
-        return dgram{ip, mask, (uint32_t)-1}.send(socket_fd) == 9;
-    return dgram{ip, mask, dist}.send(socket_fd) == 9;
+bool network_node::send_dist(int socket_fd, uint32_t outgoing_ip, uint8_t outgoing_mask) const {
+    debug("sending dist to " << inet::get_addr_with_mask(outgoing_ip, outgoing_mask) << ", about node: " << format() << "\n");
+    if(interface::get_network(outgoing_ip, outgoing_mask) == interface::get_network(route_addr, mask)) {
+        debug("sending to on the path -> sending inf\n");
+        return dgram{network_ip, mask, (uint32_t) -1}.send(socket_fd, outgoing_ip) == 9;
+    }
+    debug("sending to on not the path -> sending " << dist << "\n");
+    return dgram{network_ip, mask, dist}.send(socket_fd, outgoing_ip) == 9;
 }
 
 void network_node::attempt_update(uint32_t new_route_addr, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn) {
