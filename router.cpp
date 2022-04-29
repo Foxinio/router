@@ -85,10 +85,57 @@ public:
             return;
         }
         mark_reachable(*route);
-        auto other = find_or_insert(read.ip, read.mask, in);
+        auto node = find_or_insert(read.ip, read.mask, in);
         route->unreachable_since = turn;
-        if(route->network_ip != other->network_ip) {
-            other->attempt_update(in, route->dist, read.dist, turn);
+        if(route->network_ip != node->network_ip) {
+            node->attempt_update(in, route->dist, read.dist, turn);
+        }
+    }
+
+    int min_of_three(uint32_t first, uint32_t second, uint32_t third) const {
+        if(first < second) {
+            return first < third ? 1 : 3;
+        }
+        else {
+            return second < third ? 2 : 3;
+        }
+    }
+
+    void update(uint32_t new_route_ip, const dgram &read, const std::vector<interface>::iterator &current_interface,
+                std::vector<network_node>::iterator &network) const {
+        if(auto natural = std::find_if(interfaces.begin(),
+                interfaces.end(),
+                is_same_network(interface::get_network(read.ip, read.mask), 0)); natural != interfaces.end()) {
+            switch (min_of_three(natural->dist, network->dist, current_interface->dist + read.dist)) {
+                case 1:
+                    network->dist = natural->dist;
+                    network->route_addr = natural->network_ip;
+                    break;
+                case 3:
+                    network->dist = current_interface->dist + read.dist;
+                    network->route_addr = new_route_ip;
+                    break;
+                default:
+                    break;
+            }
+        }
+        else if(new_route_ip == network->route_addr) {
+            debug("same route addr.\n");
+            if(network_node::is_dist_inf(read.dist)) {
+                debug("updating to inf.\n");
+                if(!network_node::is_dist_inf(network->dist)) {
+                    debug("first message of this kind.\n");
+                    network->unreachable_since = turn;
+                }
+                network->dist = network_node::inf;
+            }
+            else {
+                debug("normal update/possible increase in consts.\n");
+                network->dist = read.dist + current_interface->dist;
+            }
+        }
+        else {
+            network->update_dist(new_route_ip, current_interface->dist, read.dist);
         }
     }
 
@@ -115,12 +162,12 @@ public:
                     mark_reachable(network);
                 }
                 else {
-                    debug("sending failed: [" << errno << "] " << std::strerror(errno) << "\n");
+                    debug("sending failed: [" << errno << "] " << std::strerror(errno) << ". Marking as unreachable.\n");
                     mark_unreachable(network);
                 }
             }
             if(turn > network.unreachable_since + 5) {
-                debug("no responce for 5 turns on "
+                debug("no response for 5 turns on "
                     << inet::get_addr_with_mask(network.network_ip, network.my_mask)
                     << ". Marking as unreachable.\n");
                 mark_unreachable(network);
@@ -139,15 +186,13 @@ public:
     }
 
     void clear_unreachable() {
-        debug("clearing unreachable\n");
-        int before = routing.size();
+        debug("clearing unreachable\n"; int before = routing.size());
         routing.erase(std::remove_if(routing.begin(), routing.end(), [&](const network_node& node) {
             return network_node::is_dist_inf(node.dist)
                    && turn < node.unreachable_since + 5
                    && !node.connected_directly;
         }), routing.end());
-        int after = routing.size();
-        debug("clearing done. before " << before << ", after " << after << "\n");
+        debug("clearing done. before " << before << ", after " << routing.size() << "\n");
     }
 };
 
@@ -155,12 +200,14 @@ int main(int argc, char* argv[]) {
     try {
         auto init = Init(argc, argv);
         auto interfaces = init.get_interfaces();
+#ifdef DEBUG
         for(auto item : interfaces) {
             debug("network: " << inet::get_addr(item.network_ip)
                 << ", dist: " << item.dist
                 << ", mask: " << (int)item.my_mask
                 << ", broadcast: " << inet::get_addr(item.broadcast_ip) << "\n");
         }
+#endif
         return router(init.get_interfaces(), init.get_socket_fd()).run();
     }
     catch(std::exception& e) {

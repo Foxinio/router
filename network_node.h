@@ -20,10 +20,13 @@ public:
     std::string format() const;
 
     bool send_dist(int socket_fd, uint32_t ip, uint8_t outgoing_mask) const;
+
     void attempt_update(uint32_t new_route_addr, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn);
+    void update_dist(uint32_t new_route, uint32_t dist_to_route, uint32_t new_dist_from_route);
 
     static bool is_dist_inf(uint32_t dist);
     static uint32_t inf;
+
 };
 
 
@@ -46,7 +49,7 @@ public:
 using routing_table = std::vector<network_node>;
 using interface_table = std::vector<interface>;
 
-std::ostream& operator<<(std::ostream& out, routing_table tab);
+std::ostream& operator<<(std::ostream& out, const routing_table& tab);
 
 class is_same_network {
     uint32_t my_ip;

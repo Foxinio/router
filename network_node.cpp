@@ -38,7 +38,8 @@ bool network_node::send_dist(int socket_fd, uint32_t outgoing_ip, uint8_t outgoi
     return dgram{network_ip, mask, dist}.send(socket_fd, outgoing_ip) == 9;
 }
 
-void network_node::attempt_update(uint32_t new_route_addr, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn) {
+void network_node::attempt_update(uint32_t new_route_addr, uint32_t dist_to_route,
+                                  uint32_t new_dist, uint32_t turn) {
     debug("attempting to update routing table, elem: [" << format() << "] new_addr: " << inet::get_addr(new_route_addr)
         << ", dist_to_route: " << dist_to_route << ", new_dist: " << new_dist << "\n");
     if(new_route_addr == route_addr) {
@@ -49,7 +50,7 @@ void network_node::attempt_update(uint32_t new_route_addr, uint32_t dist_to_rout
                 debug("first message of this kind.\n");
                 unreachable_since = turn;
             }
-            this->dist = new_dist;
+            this->dist = inf;
         }
         else {
             debug("normal update/possible increase in consts.\n");
@@ -67,6 +68,17 @@ bool network_node::is_dist_inf(uint32_t dist) {
     return dist >= inf;
 }
 uint32_t network_node::inf = 0xffff;
+
+void network_node::update_dist(uint32_t new_route, uint32_t dist_to_route, uint32_t new_dist_from_route) {
+    debug("attempting to update routing table, elem: ["
+        << format() << "] new_addr: " << inet::get_addr(new_route)
+        << ", dist_to_route: " << dist_to_route << ", new_dist: " << new_dist_from_route << "\n");
+    if(!network_node::is_dist_inf(new_dist_from_route) && new_dist_from_route + dist_to_route < dist) {
+        debug("normal update.\n");
+        route_addr = new_route;
+        dist = new_dist_from_route + dist_to_route;
+    }
+}
 
 interface::interface(uint32_t ip, uint32_t dist, uint8_t mask, bool reachable)
     : dist(dist)
@@ -92,7 +104,7 @@ uint32_t interface::get_network(uint32_t ip, uint8_t mask) {
     return ip & ((uint32_t)-1)>>(32-mask);
 }
 
-std::ostream& operator<<(std::ostream& out, routing_table tab) {
+std::ostream& operator<<(std::ostream& out, const routing_table& tab) {
     for(const auto& item : tab) {
         out << item.format() << "\n";
     }
