@@ -34,7 +34,7 @@ public:
     int run() {
         auto last_sent = time_point_cast<milliseconds>(high_resolution_clock::now());
         while(true) {
-            auto duration = last_sent + 30s - high_resolution_clock::now();
+            auto duration = duration_cast<milliseconds>(last_sent + 30s - high_resolution_clock::now());
 
             if(Poll(socket_fd, std::max((int)duration.count(), 0)) == 0) {
                 distribute_table();

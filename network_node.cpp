@@ -71,11 +71,11 @@ void interface::mark_reachable() {
 }
 
 uint32_t interface::get_broadcast(uint32_t ip, uint8_t mask) {
-    return ip | ((uint32_t)-1)>>mask;
+    return ip | ((uint32_t)-1)<<(mask);
 }
 
 uint32_t interface::get_network(uint32_t ip, uint8_t mask) {
-    return ip & ((uint32_t)-1)<<(32-mask);
+    return ip & ((uint32_t)-1)>>(32-mask);
 }
 
 is_same_network::is_same_network(uint32_t my_ip, uint8_t my_mask)

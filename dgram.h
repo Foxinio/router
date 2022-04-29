@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 class dgram {
     dgram() = default;
