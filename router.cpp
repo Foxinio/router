@@ -42,7 +42,7 @@ public:
         while(true) {
             auto duration = duration_cast<milliseconds>(last_sent + timeout - high_resolution_clock::now());
 
-            debug("entering Poll with wait time: " << std::max((int)duration.count(), 0) << "ms\n");
+            debug("\nentering Poll with wait time: " << std::max((int)duration.count(), 0) << "ms\n");
             if(Poll(socket_fd, std::max((int)duration.count(), 0)) == 0) {
                 debug("time's up, distributing table\n");
                 distribute_table();
