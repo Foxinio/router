@@ -75,7 +75,7 @@ public:
     void read_table() {
         auto [in, read] = dgram::recv(socket_fd);
         debug("received datagram form " << inet::get_addr(in) << ", content: [ip="
-            << inet::get_addr(read.ip) << ",mask=" << (int)read.mask << ",dist=" << read.dist << "]\n");
+                                        << inet::get_addr(read.network_ip) << ",mask=" << (int)read.mask << ",dist=" << read.dist << "]\n");
         auto route = std::find_if(interfaces.begin(),
                             interfaces.end(),
                             is_same_network(in, 0));
@@ -85,7 +85,7 @@ public:
             return;
         }
         mark_reachable(*route);
-        auto node = find_or_insert(read.ip, read.mask, in);
+        auto node = find_or_insert(read.network_ip, read.mask, in);
         route->unreachable_since = turn;
         if(route->network_ip != node->network_ip) {
             node->attempt_update(in, route->dist, read.dist, turn);
@@ -105,7 +105,7 @@ public:
                 std::vector<network_node>::iterator &network) const {
         if(auto natural = std::find_if(interfaces.begin(),
                 interfaces.end(),
-                is_same_network(interface::get_network(read.ip, read.mask), 0)); natural != interfaces.end()) {
+                is_same_network(interface::get_network(read.network_ip, read.mask), 0)); natural != interfaces.end()) {
             switch (min_of_three(natural->dist, network->dist, current_interface->dist + read.dist)) {
                 case 1:
                     network->dist = natural->dist;

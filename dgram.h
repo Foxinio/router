@@ -11,9 +11,9 @@ class dgram {
     dgram() = default;
 public:
 
-    dgram(uint32_t ip, uint8_t mask, uint32_t dist);
+    dgram(uint32_t network_ip, uint8_t mask, uint32_t dist);
 
-    uint32_t ip{};
+    uint32_t network_ip{};
     uint8_t mask{};
     uint32_t dist{};
 
