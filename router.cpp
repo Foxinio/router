@@ -19,7 +19,7 @@ class router {
 
     uint32_t turn;
 
-    const seconds timeout = 30s;
+    const seconds timeout = 3s;
 
 public:
     router(interface_table&& interfaces, int socket_fd)
@@ -154,6 +154,7 @@ public:
 #else
         std::cout
 #endif
+        << "[TURN:" << turn << "]\n"
         << format_table()
 #ifdef DEBUG
         << " ============== !OUTPUT ==============\n";

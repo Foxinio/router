@@ -47,53 +47,53 @@ enum sendto_ctlcodes {
     ip192_168_0_0_up,
     ip10_0_0_0_up,
 } poll_scenario[] = {
-    read_dgram,
+    read_dgram,         // 0
     read_dgram,
     read_dgram,
     read_dgram,
     read_dgram,
     // First turn done
-    print,
+    print,              // 5
     read_dgram,
     read_dgram,
     read_dgram,
     read_dgram,
+    read_dgram,         // 10
     read_dgram,
     read_dgram,
     read_dgram,
     read_dgram,
-    read_dgram,
-    read_dgram,
+    read_dgram,         // 15
     read_dgram,
     print,
     // Second turn done
     // testing distance degrading
     read_dgram,
     print,
-    read_dgram,
+    read_dgram,         // 20
     print,
     read_dgram,
     print,
     // testing connection losing on ip172_16_0_0
     read_dgram, // sending another connection on soon to disconnect interface
     //     first turn in this test
-    print,
+    print,              // 25
     read_dgram,
     read_dgram,
     read_dgram,
     read_dgram,
-    read_dgram,
+    read_dgram,         // 30
     print,
     print,
     print,
     //     second turn in this test
     read_dgram,
-    read_dgram,
+    read_dgram,         // 35
     read_dgram,
     read_dgram,
     read_dgram,
     print,
-    print,
+    print,              // 40
     print,
     print,
     print,
@@ -103,24 +103,48 @@ enum sendto_ctlcodes {
     // testing sendto returning error on ip10_0_0_0
     read_dgram,
     //     first turn
-    ip10_0_0_0_down,
+    ip10_0_0_0_down,    // 45
     read_dgram,
     read_dgram,
     read_dgram,
     read_dgram,
-    read_dgram,
+    read_dgram,         // 50
     print,
     print,
     print,
     print,
     // setting ip172_16_0_0 back up
-    read_dgram,
+    read_dgram,         // 55
     //     second turn
     read_dgram,
     read_dgram,
     print,
     print,
+    print,              // 60
     print,
+    // restart
+    ip10_0_0_0_up,
+    read_dgram,
+    read_dgram,
+    read_dgram,         // 65
+    read_dgram,
+    read_dgram,
+    // First turn done
+    print,
+    read_dgram,
+    read_dgram,         // 70
+    read_dgram,
+    read_dgram,
+    read_dgram,
+    read_dgram,
+    read_dgram,         // 75
+    read_dgram,
+    read_dgram,
+    read_dgram,
+    read_dgram,
+    print,              // 80
+    // Second turn done
+    read_dgram,
     print,
     };
 std::map<uint32_t,long> sendto_resp = {
@@ -151,7 +175,7 @@ int Poll(int sockfd, int timeout) {
         test_out << "[EXITING] called mock poll " << poll_step << " times.\n";
         std::exit(EXIT_SUCCESS);
     }
-    test_out << "mock poll called returning " << poll_scenario[poll_step] << "\n\n";
+    test_out << "mock poll called [step:" << std::dec << poll_step << "], returning " << poll_scenario[poll_step] << "\n\n";
     sendto_ctlcodes res = poll_scenario[poll_step];
 //    poll_step = (++poll_step)%(sizeof poll_scenario / sizeof(int));
     poll_step++;
@@ -211,17 +235,17 @@ struct recvfromresp {
         {"10.0.0.0/8", 3, "10.0.1.1"},
         {"192.168.5.0/24", 2, "10.0.1.1"},
         // first turn done
-        {"172.16.0.0/16", 2, "172.16.1.13"},
+        {"172.16.0.0/16", 2, "172.16.1.13"},                // 5
         {"192.168.2.0/24", (uint32_t)-1, "172.16.1.13"},
         {"10.0.0.0/8", (uint32_t)-1, "172.16.1.13"},
         {"192.168.2.0/24", 2, "192.168.2.5"},
         {"192.168.5.0/24", 2, "192.168.2.5"},
-        {"172.16.0.0/16", (uint32_t)-1, "192.168.2.5"},
+        {"172.16.0.0/16", (uint32_t)-1, "192.168.2.5"},     // 10
         {"10.0.0.0/8", (uint32_t)-1, "192.168.2.5"},
         {"10.0.0.0/8", 3, "10.0.1.1"},
         {"192.168.5.0/24", 2, "10.0.1.1"},
         {"192.168.2.0/24", 4, "10.0.1.1"},
-        {"172.16.0.0/16", (uint32_t)-1, "192.168.2.5"},
+        {"172.16.0.0/16", (uint32_t)-1, "192.168.2.5"},     // 15
         // second turn done
         // testing distance degrading
         {"12.16.0.0/16", 15, "172.16.1.13"},
@@ -230,13 +254,13 @@ struct recvfromresp {
         // testing connection losing on 172.16.1.13
         {"7.8.0.0/16", 1, "172.16.1.13"},
         //     first turn in this test
-        {"12.16.0.0/16", 4, "10.0.1.1"},
+        {"12.16.0.0/16", 4, "10.0.1.1"},                    // 20
         {"192.168.2.0/24", 2, "192.168.2.5"},
         {"192.168.5.0/24", 2, "192.168.2.5"},
         {"10.0.0.0/8", 3, "10.0.1.1"},
         {"192.168.5.0/24", 2, "10.0.1.1"},
         //     second turn in this test
-        {"12.16.0.0/16", 4, "10.0.1.1"},
+        {"12.16.0.0/16", 4, "10.0.1.1"},                    // 25
         {"192.168.2.0/24", 2, "192.168.2.5"},
         {"192.168.5.0/24", 2, "192.168.2.5"},
         {"10.0.0.0/8", 3, "10.0.1.1"},
@@ -245,18 +269,38 @@ struct recvfromresp {
         // setting ip172_16_0_0 back up
 //        {"172.16.0.0/16", 2, "172.16.1.13"},
         // testing sendto returning error on ip10_0_0_0
-        {"12.16.0.0/16", 0xFFFF, "10.0.1.1"},
+        {"12.16.0.0/16", (uint32_t)-1, "10.0.1.1"},               // 30
         //     first turn
         {"12.16.0.0/16", 4, "10.0.1.1"},
         {"192.168.2.0/24", 2, "192.168.2.5"},
         {"192.168.5.0/24", 2, "192.168.2.5"},
         {"10.0.0.0/8", 3, "10.0.1.1"},
-        {"192.168.5.0/24", 2, "10.0.1.1"},
+        {"192.168.5.0/24", 2, "10.0.1.1"},                  // 35
         // setting ip172_16_0_0 back up
         {"172.16.0.0/16", 2, "172.16.1.13"},
         //     second turn
         {"192.168.2.0/24", 2, "192.168.2.5"},
         {"192.168.5.0/24", 2, "192.168.2.5"},
+        // restart
+        {"172.16.0.0/16", 2, "172.16.1.13"},
+        {"192.168.2.0/24", 2, "192.168.2.5"},               // 40
+        {"192.168.5.0/24", 2, "192.168.2.5"},
+        {"10.0.0.0/8", 3, "10.0.1.1"},
+        {"192.168.5.0/24", 2, "10.0.1.1"},
+        // first turn done
+        {"172.16.0.0/16", 2, "172.16.1.13"},
+        {"192.168.2.0/24", (uint32_t)-1, "172.16.1.13"},    // 45
+        {"10.0.0.0/8", (uint32_t)-1, "172.16.1.13"},
+        {"192.168.2.0/24", 2, "192.168.2.5"},
+        {"192.168.5.0/24", 2, "192.168.2.5"},
+        {"172.16.0.0/16", (uint32_t)-1, "192.168.2.5"},
+        {"10.0.0.0/8", (uint32_t)-1, "192.168.2.5"},        // 50
+        {"10.0.0.0/8", 3, "10.0.1.1"},
+        {"192.168.5.0/24", 2, "10.0.1.1"},
+        {"192.168.2.0/24", 4, "10.0.1.1"},
+        {"172.16.0.0/16", (uint32_t)-1, "192.168.2.5"},
+        // second turn done
+        {"192.168.5.0/24", (uint32_t)-1, "192.168.2.5"},    // 55
         };
 int recvfrom_step = 0;
 long Recvfrom(int fd, void *buf, size_t n, int flags, sockaddr *addr, socklen_t *addr_len) {
@@ -265,14 +309,10 @@ long Recvfrom(int fd, void *buf, size_t n, int flags, sockaddr *addr, socklen_t 
         std::cerr << "[EXITING] called mock recvfrom " << recvfrom_step << " times.\n";
         std::exit(EXIT_SUCCESS);
     }
-    test_out << "mock recvfrom called, returning data raw ["
-             << inet::get_addr_with_mask(recvfrom_scenario[recvfrom_step].buf.network_ip, recvfrom_scenario[recvfrom_step].buf.mask)
-             << ",0x" << std::hex << recvfrom_scenario[recvfrom_step].buf.dist << "], from "
-             << inet::get_addr(recvfrom_scenario[recvfrom_step].sender) << "\n";
     memcpy(buf, &recvfrom_scenario[recvfrom_step].buf, sizeof(dgram));
     ((sockaddr_in*)addr)->sin_addr.s_addr = recvfrom_scenario[recvfrom_step].sender;
     int res = recvfrom_scenario[recvfrom_step].result;
-    test_out << "mock recvfrom called, returning data inverted ["
+    test_out << "mock recvfrom called [step:" << recvfrom_step << "], returning data inverted ["
              << inet::get_addr_with_mask(ntohl(recvfrom_scenario[recvfrom_step].buf.network_ip), recvfrom_scenario[recvfrom_step].buf.mask)
              << ",0x" << std::hex << ntohl(recvfrom_scenario[recvfrom_step].buf.dist) << "], from "
              << inet::get_addr(recvfrom_scenario[recvfrom_step].sender) << "\n\n";
@@ -283,9 +323,9 @@ long Recvfrom(int fd, void *buf, size_t n, int flags, sockaddr *addr, socklen_t 
 
 long Sendto(int fd, const void *buf, size_t n, int flags, const sockaddr *addr, socklen_t addr_len) {
     dgram* buffer = (dgram*)buf;
-    test_out << "mock sendto called with raw data: ["
-             << inet::get_addr_with_mask(buffer->network_ip, buffer->mask) << ",0x"
-             << std::hex << buffer->dist << "] to " << inet::get_addr(((sockaddr_in*)addr)->sin_addr.s_addr)
+    test_out << "mock sendto called with inverted data: ["
+             << inet::get_addr_with_mask(htonl(buffer->network_ip), buffer->mask) << ",0x"
+             << std::hex << htonl(buffer->dist) << "] to " << inet::get_addr(((sockaddr_in*)addr)->sin_addr.s_addr)
              << ", returning: " << sendto_resp[((sockaddr_in*)addr)->sin_addr.s_addr] << "\n";
     return sendto_resp[((sockaddr_in*)addr)->sin_addr.s_addr];
 }

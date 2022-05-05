@@ -33,8 +33,9 @@ network_node::network_node(uint32_t network_ip, uint8_t mask, uint32_t dist)
 bool network_node::send_dist(int socket_fd, uint32_t outgoing_ip, uint8_t outgoing_mask) const {
 //    debug("sending dist to " << inet::get_addr_with_mask(outgoing_ip, outgoing_mask) << ", about node: " << format() << "\n");
     long result;
-    if(interface::get_network(outgoing_ip, outgoing_mask) == interface::get_network(route_addr, route_mask) &&
-       interface::get_network(outgoing_ip, outgoing_mask) != interface::get_network(network_ip, mask)) {
+    if(((interface::get_network(outgoing_ip, outgoing_mask) == interface::get_network(route_addr, route_mask) &&
+            interface::get_network(outgoing_ip, outgoing_mask) != interface::get_network(network_ip, mask)) ||
+            is_dist_inf(dist))) {
         debug("sending to on the path -> sending inf\n");
         result = dgram{network_ip, mask, (uint32_t) -1}.send(socket_fd, outgoing_ip);
     }
