@@ -90,4 +90,11 @@ uint32_t get_addr(const std::string& addr) {
     }
 }
 
+std::string get_addr_str(uint32_t addr) {
+    return get_addr(addr);
+}
+std::string get_addr_with_mask_str(uint32_t addr, uint8_t mask) {
+    return get_addr_with_mask(addr, mask);
+}
+
 }

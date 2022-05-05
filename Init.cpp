@@ -17,7 +17,7 @@ Init::Init(int argc_, char* argv_[]) {
 }
 
 interface_table Init::read_input() {
-    debug("reading input.\n");
+//    debug("reading input.\n");
     int no_neighbours = 0;
     std::cin >> no_neighbours;
     interface_table res;
@@ -29,7 +29,7 @@ interface_table Init::read_input() {
         std::cin >> dist;
         auto [addr, mask] = inet::get_addr_with_mask(addr_string);
         res.emplace_back(addr, dist, mask, true);
-        debug("read " << addr_string << " with dist: " << dist << "\n");
+//        debug("read " << addr_string << " with dist: " << dist << "\n");
     }
     return res;
 }

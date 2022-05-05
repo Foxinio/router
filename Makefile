@@ -3,15 +3,15 @@ CXXFLAGS = -std=gnu++17 -g -static -Wall -Wextra
 
 all: router
 
-router: router.o utils.o network_node.o Init.o dgram.o sys_wrappers.o
+router: router.o utils.o network_node.o Init.o dgram.o sys_wrappers.o \
+				 utils.h network_node.h Init.h dgram.h sys_wrappers.h
 
-tester: router.o utils.o network_node.o Init.o dgram.o test/sys_wrappers_fixture.o
-	g++ router.o utils.o network_node.o Init.o dgram.o test/sys_wrappers_fixture.o -o tester
-
-sys_wrappers_fixture.o: test/sys_wrappers_fixture.cpp
+tester: router.o utils.o network_node.o Init.o dgram.o sys_wrappers_fixture.o \
+				 utils.h network_node.h Init.h dgram.h sys_wrappers.h
+	g++ router.o utils.o network_node.o Init.o dgram.o sys_wrappers_fixture.o -o tester
 
 clean:
-	rm -f router *.o szymon_jedras.tar.xz
+	rm -f router tester *.o szymon_jedras.tar.xz
 
 tar:
 	@mkdir szymon_jedras
