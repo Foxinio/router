@@ -5,6 +5,7 @@ all: router
 
 router: router.o utils.o network_node.o Init.o dgram.o sys_wrappers.o \
 				 utils.h network_node.h Init.h dgram.h sys_wrappers.h
+	g++ router.o utils.o network_node.o Init.o dgram.o sys_wrappers.o -o router
 
 tester: router.o utils.o network_node.o Init.o dgram.o sys_wrappers_fixture.o \
 				 utils.h network_node.h Init.h dgram.h sys_wrappers.h

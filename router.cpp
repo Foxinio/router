@@ -1,5 +1,4 @@
 #include "utils.h"
-
 #include "Init.h"
 #include "dgram.h"
 #include "sys_wrappers.h"
@@ -9,7 +8,6 @@
 #include <chrono>
 #include <sstream>
 #include <algorithm>
-#include <cstring>
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -209,7 +207,7 @@ public:
 
     void clear_unreachable() {
 //        debug("clearing unreachable\n")
-        long before = routing.size();
+        debug("";long before = routing.size());
         routing.erase(std::remove_if(routing.begin(), routing.end(), [&](const network_node& node) {
             if(network_node::is_dist_inf(node.dist)) {
                 if(turn >= node.unreachable_since + 5) {
