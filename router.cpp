@@ -110,7 +110,7 @@ public:
         auto node = find_or_insert(read.network_ip, read.mask, in, route->my_mask);
         route->unreachable_since = turn;
         if(in != route->my_ip) {
-            node->attempt_update(in, route->my_mask, route->dist, read.dist, turn);
+            node->attempt_update(in, route->my_mask, route->dist, read.dist, turn, route->network_ip == node->network_ip);
         }
     }
 
@@ -163,7 +163,11 @@ public:
 
     void mark_reachable(interface &network) {
         network.mark_reachable();
-        find(network.network_ip, network.my_mask)->dist = network.dist;
+        auto it = find(network.network_ip, network.my_mask);
+        if(it->dist >= network.dist) {
+            routing.erase(it);
+            routing.emplace_back(network.network_ip, network.my_mask, network.dist);
+        }
     }
 
     void mark_unreachable(interface &network) {

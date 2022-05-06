@@ -46,7 +46,7 @@ bool network_node::send_dist(int socket_fd, uint32_t outgoing_ip, uint8_t outgoi
 }
 
 void network_node::attempt_update(uint32_t new_route_addr, uint8_t new_route_mask, uint32_t dist_to_route,
-                                  uint32_t new_dist, uint32_t turn) {
+                                  uint32_t new_dist, uint32_t turn, bool connected_directly) {
     debug("attempting to update routing table, elem: [" << format() << "] new_addr: " << inet::get_addr_with_mask(new_route_addr, new_route_mask)
         << ", dist_to_route: " << dist_to_route << ", new_dist: " << new_dist << "\n");
     if(new_route_addr == route_addr) {
@@ -70,6 +70,7 @@ void network_node::attempt_update(uint32_t new_route_addr, uint8_t new_route_mas
         this->route_addr = new_route_addr;
         this->route_mask = new_route_mask;
         this->dist = new_dist + dist_to_route;
+        this->connected_directly = connected_directly;
     }
 }
 
@@ -77,18 +78,6 @@ bool network_node::is_dist_inf(uint32_t dist) {
     return dist >= 0xff;
 }
 uint32_t network_node::inf = (uint32_t)-1;
-
-void network_node::update_dist(uint32_t new_route_ip, uint8_t new_route_mask, uint32_t dist_to_route, uint32_t new_dist_from_route) {
-    debug("attempting to update routing table, elem: ["
-        << format() << "] new_addr: " << inet::get_addr(new_route_ip)
-        << ", dist_to_route: " << dist_to_route << ", new_dist: " << new_dist_from_route << "\n");
-    if(!network_node::is_dist_inf(new_dist_from_route) && new_dist_from_route + dist_to_route < dist) {
-        debug("normal update.\n");
-        route_addr = new_route_ip;
-        route_mask = new_route_mask;
-        dist = new_dist_from_route + dist_to_route;
-    }
-}
 
 void network_node::set_unreachable(uint32_t turn) {
     if(!is_dist_inf(dist)) {

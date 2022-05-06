@@ -21,8 +21,7 @@ public:
 
     bool send_dist(int socket_fd, uint32_t ip, uint8_t outgoing_mask, uint32_t turn) const;
 
-    void attempt_update(uint32_t new_route_addr, uint8_t new_route_mask, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn);
-    void update_dist(uint32_t new_route_ip, uint8_t new_route_mask, uint32_t dist_to_route, uint32_t new_dist_from_route);
+    void attempt_update(uint32_t new_route_addr, uint8_t new_route_mask, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn, bool connected_directly);
 
     static bool is_dist_inf(uint32_t dist);
     static uint32_t inf;
