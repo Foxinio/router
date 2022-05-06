@@ -153,16 +153,14 @@ public:
     void distribute_table() {
 #ifdef DEBUG
         std::cerr << "\n ============== OUTPUT ==============\n"
-#else
-        std::cout
-#endif
         << "[TURN:" << turn << "]\n"
         << format_table()
-#ifdef DEBUG
         << " ============== !OUTPUT ==============\n";
-#else
-        << std::endl;
 #endif
+        std::cout
+        << "[TURN:" << turn << "]\n"
+        << format_table()
+        << std::endl;
         for(auto& network : interfaces) {
             debug("\nnetwork: " << inet::get_addr_with_mask(network.network_ip, network.my_mask)
                 << ", last heard: " << network.unreachable_since << "\n");
