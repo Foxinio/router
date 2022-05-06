@@ -1,6 +1,5 @@
-//
-// Created by foxinio on 4/22/22.
-//
+// Szymon Jedras, i322920
+
 #pragma once
 
 #include <string>

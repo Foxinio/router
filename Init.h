@@ -1,6 +1,5 @@
-//
-// Created by foxinio on 4/23/22.
-//
+// Szymon Jedras, i322920
+
 #include "network_node.h"
 
 #include <iostream>

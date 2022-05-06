@@ -1,3 +1,5 @@
+// Szymon Jedras, i322920
+
 #include "utils.h"
 #include "Init.h"
 #include "dgram.h"

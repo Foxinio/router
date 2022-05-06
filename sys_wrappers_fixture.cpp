@@ -1,6 +1,5 @@
-//
-// Created by foxinio on 5/4/22.
-//
+// Szymon Jedras, i322920
+
 
 #include "sys_wrappers.h"
 
