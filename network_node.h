@@ -36,6 +36,7 @@ public:
     uint32_t unreachable_since = 0;
     uint32_t broadcast_ip;
     uint32_t network_ip;
+    uint32_t my_ip;
     uint8_t my_mask;
     bool reachable;
 

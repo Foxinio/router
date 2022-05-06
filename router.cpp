@@ -85,11 +85,13 @@ public:
             //std::exit(EXIT_FAILURE);
             return;
         }
-        mark_reachable(*route);
-        auto node = find_or_insert(read.network_ip, read.mask, in, route->my_mask);
-        route->unreachable_since = turn;
-        if(route->network_ip != node->network_ip) {
-            node->attempt_update(in, route->my_mask, route->dist, read.dist, turn);
+        if(in != route->my_ip) {
+            mark_reachable(*route);
+            auto node = find_or_insert(read.network_ip, read.mask, in, route->my_mask);
+            route->unreachable_since = turn;
+            if (route->network_ip != node->network_ip) {
+                node->attempt_update(in, route->my_mask, route->dist, read.dist, turn);
+            }
         }
     }
 
@@ -142,7 +144,7 @@ public:
         }
     }
 
-    std::string format_table() {
+    std::string format_table() const {
         std::stringstream ss;
         for(const auto& other : routing) {
             if(!network_node::is_dist_inf(other.dist) || turn < other.unreachable_since + 5)
@@ -152,15 +154,16 @@ public:
     }
 
     void distribute_table() {
+        auto format = format_table();
 #ifdef DEBUG
         std::cerr << "\n ============== OUTPUT ==============\n"
         << "[TURN:" << turn << "]\n"
-        << format_table()
+        << format
         << " ============== !OUTPUT ==============\n";
 #endif
         std::cout
         << "[TURN:" << turn << "]\n"
-        << format_table()
+        << format
         << std::endl;
         for(auto& network : interfaces) {
             debug("\nnetwork: " << inet::get_addr_with_mask(network.network_ip, network.my_mask)
@@ -175,7 +178,7 @@ public:
 //                    mark_reachable(network);
                 }
                 else {
-                    debug("sending failed: [" << errno << "] " << std::strerror(errno) << ". Marking as unreachable.\n");
+//                    debug("sending failed: [" << errno << "] " << std::strerror(errno) << ". Marking as unreachable.\n");
                     mark_unreachable(network);
                 }
             }

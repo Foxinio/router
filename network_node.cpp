@@ -18,7 +18,6 @@ std::string network_node::format() const {
 network_node::network_node(uint32_t network_ip, uint8_t mask, uint32_t route_addr, uint32_t route_mask, uint32_t dist)
     : network_ip(network_ip)
     , route_addr(route_addr)
-    , unreachable_since(-1)
     , dist(dist)
     , mask(mask)
     , route_mask(route_mask) {}
@@ -29,7 +28,9 @@ network_node::network_node(uint32_t network_ip, uint8_t mask, uint32_t dist)
 }
 
 bool network_node::send_dist(int socket_fd, uint32_t outgoing_ip, uint8_t outgoing_mask, uint32_t turn) const {
-//    debug("sending dist to " << inet::get_addr_with_mask(outgoing_ip, outgoing_mask) << ", about node: " << format() << "\n");
+   debug("sending dist to " << inet::get_addr_with_mask(outgoing_ip, outgoing_mask) << ", about node: "
+   << "\n\t[ip:" << inet::get_addr_with_mask(network_ip,mask) << ",route:" << inet::get_addr_with_mask(route_addr, route_mask)
+   << ",dist:" << dist << ",unreachable_since:" << unreachable_since << "]");
     long result = 9;
     if(((interface::get_network(outgoing_ip, outgoing_mask) == interface::get_network(route_addr, route_mask) &&
             interface::get_network(outgoing_ip, outgoing_mask) != interface::get_network(network_ip, mask)) ||
@@ -93,6 +94,7 @@ interface::interface(uint32_t ip, uint32_t dist, uint8_t mask, bool reachable)
     : dist(dist)
     , broadcast_ip(get_broadcast(ip, mask))
     , network_ip(get_network(ip, mask))
+    , my_ip(ip)
     , my_mask(mask)
     , reachable(reachable) {}
 

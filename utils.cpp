@@ -23,7 +23,7 @@ int find_zero(char* c, int size) {
     }
     return -1;
 }
-std::string get_addr_with_mask(uint32_t addr, uint8_t mask) {
+std::string get_addr_with_mask(const uint32_t addr, const uint8_t mask) {
     char buffer[19] = {0};
     if (inet_ntop(AF_INET, &addr, buffer, 19) == nullptr) {
         switch(errno) {

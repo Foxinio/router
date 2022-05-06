@@ -1,5 +1,7 @@
 *.o
 .idea
 router
+tester
 test.cpp
-patch
+test.out
+
