@@ -90,6 +90,13 @@ void network_node::update_dist(uint32_t new_route_ip, uint8_t new_route_mask, ui
     }
 }
 
+void network_node::set_unreachable(uint32_t turn) {
+    if(!is_dist_inf(dist)) {
+        dist = network_node::inf;
+        unreachable_since = turn;
+    }
+}
+
 interface::interface(uint32_t ip, uint32_t dist, uint8_t mask, bool reachable)
     : dist(dist)
     , broadcast_ip(get_broadcast(ip, mask))

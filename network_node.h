@@ -27,6 +27,7 @@ public:
     static bool is_dist_inf(uint32_t dist);
     static uint32_t inf;
 
+    void set_unreachable(uint32_t turn);
 };
 
 

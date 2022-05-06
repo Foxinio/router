@@ -10,6 +10,7 @@
 #include <chrono>
 #include <sstream>
 #include <algorithm>
+#include <map>
 #include <cstring>
 
 using namespace std::chrono;
@@ -18,6 +19,7 @@ using namespace std::chrono_literals;
 class router {
     interface_table interfaces;
     routing_table routing;
+    std::map<uint32_t,uint32_t> last_heard;
     int socket_fd;
 
     uint32_t turn;
@@ -46,12 +48,30 @@ public:
                 debug("\ttime's up, distributing table\n");
                 distribute_table();
                 clear_unreachable();
+                deal_with_oposites();
                 last_sent = time_point_cast<milliseconds>(high_resolution_clock::now());
                 turn++;
             }
             else {
                 debug("\treceived datagram\n");
                 read_table();
+            }
+        }
+    }
+
+    void deal_with_oposites() {
+        for(auto it = last_heard.begin(); it != last_heard.end();) {
+            auto [addr, last_turn] = *it;
+            if(turn >= last_turn + 5) {
+                for (auto &node: routing) {
+                    if (node.route_addr == addr) {
+                        node.set_unreachable(turn);
+                    }
+                }
+                last_heard.erase(it++);
+            }
+            else {
+                ++it;
             }
         }
     }
@@ -74,6 +94,7 @@ public:
 
     void read_table() {
         auto [in, read] = dgram::recv(socket_fd);
+        last_heard[in] = turn;
         debug("received datagram form " << inet::get_addr(in) << ", content: [ip="
                                         << inet::get_addr(read.network_ip) << ",mask=" << (int)read.mask << ",dist=" << read.dist << "]\n");
         auto route = std::max_element(interfaces.begin(),
@@ -85,62 +106,11 @@ public:
             //std::exit(EXIT_FAILURE);
             return;
         }
+        mark_reachable(*route);
+        auto node = find_or_insert(read.network_ip, read.mask, in, route->my_mask);
+        route->unreachable_since = turn;
         if(in != route->my_ip) {
-            mark_reachable(*route);
-            auto node = find_or_insert(read.network_ip, read.mask, in, route->my_mask);
-            route->unreachable_since = turn;
-            if (route->network_ip != node->network_ip) {
-                node->attempt_update(in, route->my_mask, route->dist, read.dist, turn);
-            }
-        }
-    }
-
-    int min_of_three(uint32_t first, uint32_t second, uint32_t third) const {
-        if(first < second) {
-            return first < third ? 1 : 3;
-        }
-        else {
-            return second < third ? 2 : 3;
-        }
-    }
-
-    void update(uint32_t new_route_ip, uint32_t new_route_mask, const dgram &read, const std::vector<interface>::iterator &current_interface,
-                std::vector<network_node>::iterator &network) const {
-        if(auto natural = std::find_if(interfaces.begin(),
-                interfaces.end(),
-                is_same_network(interface::get_network(read.network_ip, read.mask), 0)); natural != interfaces.end()) {
-            switch (min_of_three(natural->dist, network->dist, current_interface->dist + read.dist)) {
-                case 1:
-                    network->dist = natural->dist;
-                    network->route_addr = natural->network_ip;
-                    network->route_mask = natural->my_mask;
-                    break;
-                case 3:
-                    network->dist = current_interface->dist + read.dist;
-                    network->route_addr = new_route_ip;
-                    network->route_mask = new_route_mask;
-                    break;
-                default:
-                    break;
-            }
-        }
-        else if(new_route_ip == network->route_addr) {
-            debug("same route addr.\n");
-            if(network_node::is_dist_inf(read.dist)) {
-                debug("updating to inf.\n");
-                if(!network_node::is_dist_inf(network->dist)) {
-                    debug("first message of this kind.\n");
-                    network->unreachable_since = turn;
-                }
-                network->dist = network_node::inf;
-            }
-            else {
-                debug("normal update/possible increase in consts.\n");
-                network->dist = read.dist + current_interface->dist;
-            }
-        }
-        else {
-            network->update_dist(new_route_ip, new_route_mask, current_interface->dist, read.dist);
+            node->attempt_update(in, route->my_mask, route->dist, read.dist, turn);
         }
     }
 
@@ -199,12 +169,10 @@ public:
     void mark_unreachable(interface &network) {
         if(network.reachable) {
             network.mark_unreachable(turn);
-//        find(network.network_ip, network.my_mask)->dist = network_node::inf;
             for (auto &node: routing) {
                 if (interface::get_network(node.route_addr, node.route_mask) == network.network_ip &&
                     node.route_mask == network.my_mask) {
-                    node.dist = network_node::inf;
-                    node.unreachable_since = turn;
+                    node.set_unreachable(turn);
                 }
             }
         }
