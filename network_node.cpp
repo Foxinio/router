@@ -30,16 +30,16 @@ network_node::network_node(uint32_t network_ip, uint8_t mask, uint32_t dist)
     connected_directly = true;
 }
 
-bool network_node::send_dist(int socket_fd, uint32_t outgoing_ip, uint8_t outgoing_mask) const {
+bool network_node::send_dist(int socket_fd, uint32_t outgoing_ip, uint8_t outgoing_mask, uint32_t turn) const {
 //    debug("sending dist to " << inet::get_addr_with_mask(outgoing_ip, outgoing_mask) << ", about node: " << format() << "\n");
-    long result;
+    long result = 9;
     if(((interface::get_network(outgoing_ip, outgoing_mask) == interface::get_network(route_addr, route_mask) &&
             interface::get_network(outgoing_ip, outgoing_mask) != interface::get_network(network_ip, mask)) ||
-            is_dist_inf(dist))) {
+            (is_dist_inf(dist) && turn < unreachable_since + 5))) {
         debug("sending to on the path -> sending inf\n");
         result = dgram{network_ip, mask, (uint32_t) -1}.send(socket_fd, outgoing_ip);
     }
-    else {
+    else if(!is_dist_inf(dist)){
         debug("sending to on not the path -> sending " << dist << "\n");
         result = dgram{network_ip, mask, dist}.send(socket_fd, outgoing_ip);
     }
@@ -75,9 +75,9 @@ void network_node::attempt_update(uint32_t new_route_addr, uint8_t new_route_mas
 }
 
 bool network_node::is_dist_inf(uint32_t dist) {
-    return dist >= inf;
+    return dist >= 0xff;
 }
-uint32_t network_node::inf = 0xffff;
+uint32_t network_node::inf = (uint32_t)-1;
 
 void network_node::update_dist(uint32_t new_route_ip, uint8_t new_route_mask, uint32_t dist_to_route, uint32_t new_dist_from_route) {
     debug("attempting to update routing table, elem: ["

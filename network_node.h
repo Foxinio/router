@@ -20,7 +20,7 @@ public:
     network_node(uint32_t network_ip, uint8_t mask, uint32_t dist);
     std::string format() const;
 
-    bool send_dist(int socket_fd, uint32_t ip, uint8_t outgoing_mask) const;
+    bool send_dist(int socket_fd, uint32_t ip, uint8_t outgoing_mask, uint32_t turn) const;
 
     void attempt_update(uint32_t new_route_addr, uint8_t new_route_mask, uint32_t dist_to_route, uint32_t new_dist, uint32_t turn);
     void update_dist(uint32_t new_route_ip, uint8_t new_route_mask, uint32_t dist_to_route, uint32_t new_dist_from_route);

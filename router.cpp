@@ -169,7 +169,7 @@ public:
                     << " via " << inet::get_addr_with_mask(node.route_addr, node.route_mask) << " on "
                     << inet::get_addr_with_mask(network.broadcast_ip, network.my_mask)
                     << ". current dist: " << node.dist << "\n");
-                if(node.send_dist(socket_fd, network.broadcast_ip, network.my_mask)) {
+                if(node.send_dist(socket_fd, network.broadcast_ip, network.my_mask, turn)) {
                     debug("sending successful\n");
 //                    mark_reachable(network);
                 }
