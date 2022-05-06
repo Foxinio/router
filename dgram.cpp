@@ -32,7 +32,7 @@ long dgram::send(int socket_fd, uint32_t broadcast) {
             .sin_zero = {}
     };
     debug("sending packet raw [" << inet::get_addr_with_mask(network_ip, mask)
-        << ",0x" << std::hex << dist << std::dec << "] to " << inet::get_addr(broadcast) << "\n");
+        << ",0x" << std::hex << dist << std::dec << "] to " << inet::get_addr(broadcast) << " on port: " << PORT << "\n");
     dgram to_send(htonl(network_ip), mask, htonl(dist));
 //    debug("sent packet inverted [" << inet::get_addr_with_mask(to_send.network_ip, to_send.mask)
 //        << "," << to_send.dist << "]\n");
