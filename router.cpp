@@ -10,6 +10,7 @@
 #include <chrono>
 #include <sstream>
 #include <algorithm>
+#include <cstring>
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
