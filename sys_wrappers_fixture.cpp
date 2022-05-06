@@ -313,7 +313,7 @@ long Recvfrom(int fd, void *buf, size_t n, int flags, sockaddr *addr, socklen_t 
     int res = recvfrom_scenario[recvfrom_step].result;
     test_out << "mock recvfrom called [step:" << recvfrom_step << "], returning data inverted ["
              << inet::get_addr_with_mask(ntohl(recvfrom_scenario[recvfrom_step].buf.network_ip), recvfrom_scenario[recvfrom_step].buf.mask)
-             << ",0x" << std::hex << ntohl(recvfrom_scenario[recvfrom_step].buf.dist) << "], from "
+             << ",0x" << std::hex << ntohl(recvfrom_scenario[recvfrom_step].buf.dist) << std::dec << "], from "
              << inet::get_addr(recvfrom_scenario[recvfrom_step].sender) << "\n\n";
 //    recvfrom_step = (++recvfrom_step)%(sizeof recvfrom_scenario / sizeof(recvfromresp));
     recvfrom_step++;
@@ -324,7 +324,7 @@ long Sendto(int fd, const void *buf, size_t n, int flags, const sockaddr *addr, 
     dgram* buffer = (dgram*)buf;
     test_out << "mock sendto called with inverted data: ["
              << inet::get_addr_with_mask(htonl(buffer->network_ip), buffer->mask) << ",0x"
-             << std::hex << htonl(buffer->dist) << "] to " << inet::get_addr(((sockaddr_in*)addr)->sin_addr.s_addr)
+             << std::hex << htonl(buffer->dist) << std::dec << "] to " << inet::get_addr(((sockaddr_in*)addr)->sin_addr.s_addr)
              << ", returning: " << sendto_resp[((sockaddr_in*)addr)->sin_addr.s_addr] << "\n";
     return sendto_resp[((sockaddr_in*)addr)->sin_addr.s_addr];
 }
